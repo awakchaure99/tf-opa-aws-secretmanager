@@ -1,0 +1,41 @@
+name: terraform OPA
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  opa-policy-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v3
+
+      - name: setup terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Generate Terraform Plan JSON Output
+        run: |
+          terraform plan -out="plan.tfplan"
+          terraform show -json plan.tfplan | grep -v "::debug::" | tail -n +2 > tfplan.json
+          pwd
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      - name: Evaluate OPA policy check
+        id: evaluate_policies
+        run: |
+          echo `opa version`
+          opa eval --format pretty --data policy/ --input tfplan.json "data.main.deny" --fail-defined
+          
