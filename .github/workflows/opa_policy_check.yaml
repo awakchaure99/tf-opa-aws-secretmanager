@@ -22,11 +22,11 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      - name: Generate Terraform Plan JSON Output
-        run: |
-          terraform plan -out="plan.tfplan"
-          terraform show -json plan.tfplan | grep -v "::debug::" | tail -n +2 > tfplan.json
-          pwd
+      # - name: Generate Terraform Plan JSON Output
+      #   run: |
+      #     terraform plan -out="plan.tfplan"
+      #     terraform show -json plan.tfplan | grep -v "::debug::" | tail -n +2 > tfplan.json
+      #     pwd
 
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
